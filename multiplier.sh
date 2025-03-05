@@ -93,7 +93,20 @@ start_demon() {
 # 1. Останавливаем демон
 stop_demon
 
-# 2. Копируем содержимое папки
+# 2. Удаляем содержимое целевой папки
+echo "Удаляю содержимое папки '$DESTINATION_DIR'..."
+rm -rf "$DESTINATION_DIR"/*
+rm -rf "$DESTINATION_DIR"/.* 2>/dev/null # удаляем скрытые файлы и папки
+
+if [ $? -ne 0 ]; then
+  echo "Ошибка: Не удалось удалить содержимое папки '$DESTINATION_DIR'."
+  # Если удаление не удалось, нужно запустить демон обратно
+  start_demon
+  exit 1
+fi
+echo "Содержимое папки '$DESTINATION_DIR' удалено."
+
+# 3. Копируем содержимое папки
 echo "Копирую содержимое папки '$SOURCE_DIR' в '$DESTINATION_DIR'..."
 cp -r "$SOURCE_DIR"/* "$DESTINATION_DIR"/
 if [ $? -ne 0 ]; then
@@ -104,7 +117,7 @@ if [ $? -ne 0 ]; then
 fi
 echo "Копирование завершено."
 
-# 3. Запускаем демон
+# 4. Запускаем демон
 start_demon
 
 echo "Скрипт завершен успешно."
